@@ -34,7 +34,7 @@ Middleware
 There are three middleware classes in Djheroku. They are used to redirect
 permanently from one URL to another.
 
-* ´NoWwwMiddleware` removed www. from URLs of incoming requests.
+* `NoWwwMiddleware` removed www. from URLs of incoming requests.
   The opposite is built-in functionality of Django. Enable this Middleware
   and set NO_WWW = True in settings.py to activate.
 * `PreferredDomainMiddleware` redirects all domains directed to the
