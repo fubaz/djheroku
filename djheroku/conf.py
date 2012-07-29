@@ -40,3 +40,14 @@ def mailgun():
     result['EMAIL_USE_TLS'] = result['EMAIL_PORT'] == 587
 
     return result
+
+def cloudant():
+    mapping = {}
+    mapping['CLOUDANT_URL'] = 'CLOUDANT_URL'
+    try:
+        result = env_to_django(mapping)
+    except:
+        return {}
+
+    return result
+
