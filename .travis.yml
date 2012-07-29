@@ -4,3 +4,4 @@ python:
  - 2.6
  - 2.7
 install: /bin/true
+script: /bin/true
