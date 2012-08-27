@@ -3,7 +3,7 @@ from __future__ import with_statement
 
 import unittest2
 from mock import MagicMock
-from djheroku import sendgrid, mailgun
+from djheroku import sendgrid, mailgun, cloudant
 import os
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
@@ -13,6 +13,7 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'MAILGUN_SMTP_PORT': 666,
                 'MAILGUN_SMTP_SERVER': 'smtp.mailgun.com',
                 'MAILGUN_API_KEY': 'key',
+                'CLOUDANT_URL': 'http://www.google.com/',
                }
 
 def getitem(name):
@@ -87,3 +88,11 @@ class TestDjheroku(unittest2.TestCase): # pylint: disable-msg=R0904
         with self.assertRaises(KeyError):
             print result['EMAIL_USE_TLS']
 
+    def test_cloudant(self):
+        ''' Test Cloudant variables '''
+        result = cloudant()
+        self.assertEquals('http://www.google.com/', result['CLOUDANT_URL'])
+        del(ENVIRON_DICT['CLOUDANT_URL'])
+        result = cloudant()
+        with self.assertRaises(KeyError):
+            print result['CLOUDANT_URL']
