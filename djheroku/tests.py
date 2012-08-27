@@ -2,11 +2,17 @@
 
 import unittest2
 from mock import MagicMock
-from djheroku import sendgrid
+from djheroku import sendgrid, mailgun
 import os
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
-                'SENDGRID_PASSWORD': 's3cr37'}
+                'SENDGRID_PASSWORD': 's3cr37',
+                'MAILGUN_SMTP_LOGIN': 'bob',
+                'MAILGUN_SMTP_PASSWORD': 'NoneShallPass',
+                'MAILGUN_SMTP_PORT': 666,
+                'MAILGUN_SMTP_SERVER': 'smtp.mailgun.com',
+                'MAILGUN_API_KEY': 'key',
+               }
 
 def getitem(name):
     ''' Mock getitem '''
@@ -19,7 +25,7 @@ class TestDjheroku(unittest2.TestCase): # pylint: disable-msg=R0904
     ''' Test configuration parameters from Heroku env to Django settings '''
 
     def test_sendgrid_basic(self):
-        ''' Test SENDGRID configuration '''
+        ''' Test Sendgrid configuration '''
         result = sendgrid()
         self.assertEquals('alice', result['EMAIL_HOST_USER'])
         self.assertEquals('s3cr37', result['EMAIL_HOST_PASSWORD'])
@@ -52,3 +58,16 @@ class TestDjheroku(unittest2.TestCase): # pylint: disable-msg=R0904
             print result['EMAIL_HOST_USER']
         with self.assertRaises(KeyError):
             print result['EMAIL_HOST_PASSWORD']
+
+    def test_mailgun_basic(self):
+        ''' Test Mailgun configuration '''
+        result = mailgun()
+        self.assertEquals('bob', result['EMAIL_HOST_USER'])
+        self.assertEquals('NoneShallPass', result['EMAIL_HOST_PASSWORD'])
+        self.assertTrue('mailgun' in result['EMAIL_HOST'])
+        self.assertEquals(666, result['EMAIL_PORT'])
+        self.assertFalse(result['EMAIL_USE_TLS'])
+        ENVIRON_DICT['MAILGUN_SMTP_PORT'] = 587
+        result = mailgun()
+        self.assertTrue(result['EMAIL_USE_TLS'])
+
