@@ -72,3 +72,18 @@ class TestDjheroku(unittest2.TestCase): # pylint: disable-msg=R0904
         result = mailgun()
         self.assertTrue(result['EMAIL_USE_TLS'])
 
+    def test_mailgun_missing_env(self):
+        ''' Test that variables are not set if environment is not present '''
+        del(ENVIRON_DICT['MAILGUN_API_KEY'])
+        result = mailgun()
+        with self.assertRaises(KeyError):
+            print result['EMAIL_HOST_USER']
+        with self.assertRaises(KeyError):
+            print result['EMAIL_HOST_PASSWORD']
+        with self.assertRaises(KeyError):
+            print result['EMAIL_HOST']
+        with self.assertRaises(KeyError):
+            print result['EMAIL_PORT']
+        with self.assertRaises(KeyError):
+            print result['EMAIL_USE_TLS']
+
