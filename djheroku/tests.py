@@ -1,4 +1,5 @@
 ''' Djheroku tests '''
+from __future__ import with_statement
 
 import unittest2
 from mock import MagicMock
