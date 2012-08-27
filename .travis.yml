@@ -3,5 +3,5 @@ python:
  - 2.5
  - 2.6
  - 2.7
-install: /bin/true
+install: pip install -r requirements.txt
 script: nosetests --with-xunit --cover-html
