@@ -1,6 +1,9 @@
+''' Map environment variables from Heroku to Django configuration '''
+
 import os
 
 def env_to_django(mappings):
+    ''' Copy environment variables to Django configuration variables '''
     result = {}
     for django_var, env in mappings.items():
         try:
@@ -12,12 +15,13 @@ def env_to_django(mappings):
     return result
 
 def sendgrid():
+    ''' Map Sendgrid environment variables to Django '''
     mapping = {}
     mapping['EMAIL_HOST_USER']     = 'SENDGRID_USERNAME'
     mapping['EMAIL_HOST_PASSWORD'] = 'SENDGRID_PASSWORD'
     try:
         result = env_to_django(mapping)
-    except:
+    except: # pylint: disable-msg=W0702
         return {}
     result['EMAIL_HOST']    = 'smtp.sendgrid.net'
     result['EMAIL_PORT']    = 587
@@ -26,6 +30,7 @@ def sendgrid():
     return result
 
 def mailgun():
+    ''' Map Mailgun environment variables to Django '''
     mapping = {}
     mapping['EMAIL_HOST']          = 'MAILGUN_SMTP_SERVER'
     mapping['EMAIL_PORT']          = 'MAILGUN_SMTP_PORT'
@@ -34,7 +39,7 @@ def mailgun():
     mapping['MAILGUN_API_KEY']     = 'MAILGUN_API_KEY'
     try:
         result = env_to_django(mapping)
-    except:
+    except: # pylint: disable-msg=W0702
         return {}
     result['EMAIL_PORT'] = int(result['EMAIL_PORT'])
     result['EMAIL_USE_TLS'] = result['EMAIL_PORT'] == 587
@@ -42,11 +47,12 @@ def mailgun():
     return result
 
 def cloudant():
+    ''' Map Cloudant URL to CLOUDANT_URL on Django '''
     mapping = {}
     mapping['CLOUDANT_URL'] = 'CLOUDANT_URL'
     try:
         result = env_to_django(mapping)
-    except:
+    except: # pylint: disable-msg=W0702
         return {}
 
     return result
