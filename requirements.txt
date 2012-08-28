@@ -1,3 +1,4 @@
 unittest2==0.5.1
 coverage==3.5.2
 Django==1.4.1
+nose==1.1.2
