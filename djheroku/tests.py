@@ -149,6 +149,8 @@ class TestDjheroku(unittest2.TestCase): # pylint: disable-msg=R0904
             print result['EMAIL_PORT']
         with self.assertRaises(KeyError):
             print result['EMAIL_USE_TLS']
+        with self.assertRaises(KeyError):
+            print result['MAILGUN_API_KEY']
 
     def test_cloudant(self):
         ''' Test Cloudant variables '''
