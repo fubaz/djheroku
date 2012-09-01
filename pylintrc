@@ -1,0 +1,5 @@
+[BASIC]
+method-rgx=[a-z_][a-z0-9_]{2,50}$
+
+[FORMAT]
+line_length=140
