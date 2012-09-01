@@ -8,10 +8,10 @@ import os
 
 from django.conf import settings
 
-settings.configure(DEBUG = True, DATABASES = {'default': dict() })
+settings.configure(DEBUG=True, DATABASES={'default': dict()})
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
-from djheroku.middleware import NoWwwMiddleware
+from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SENDGRID_PASSWORD': 's3cr37',
@@ -21,7 +21,8 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'MAILGUN_SMTP_SERVER': 'smtp.mailgun.com',
                 'MAILGUN_API_KEY': 'key',
                 'CLOUDANT_URL': 'http://www.google.com/',
-               }
+                }
+
 
 def getitem(name):
     ''' Mock getitem '''
@@ -30,10 +31,67 @@ def getitem(name):
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
 
-class TestNoWwwMiddleware(unittest2.TestCase): # pylint: disable-msg=R0904
+
+class TestForceSSLMiddleware(unittest2.TestCase):
+    def setUp(self):  # pylint: disable=C0103
+        self.middleware = ForceSSLMiddleware()
+        settings.FORCE_SSL = True
+        settings.DEBUG = False
+        self.request = HttpRequest()
+        self.request.path = '/test_path'
+        self.request.META['SERVER_NAME'] = 'www.example.com'
+        self.request.META['SERVER_PORT'] = 80
+        self.request.is_secure = MagicMock(return_value=False)
+
+    def test_post_fails(self):
+        ''' POST data is lost in redirection -> fail '''
+        self.request.method = 'POST'
+        with self.assertRaises(RuntimeError):
+            self.middleware.process_request(self.request)
+
+    def test_middleware_enabled_by_default(self):
+        ''' The middleware is off by default '''
+        del(settings.FORCE_SSL)
+        self.assertIsInstance(self.middleware.process_request(self.request),
+                              HttpResponsePermanentRedirect)
+
+    def test_middleware_disabled_by_settings(self):
+        ''' The middleware is enabled through FORCE_SSL parameter '''
+        settings.FORCE_SSL = False
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_trigger_with_is_secure_false(self):
+        ''' Redirect if Django HttpRequest is not secure '''
+        self.assertIsInstance(self.middleware.process_request(self.request),
+                              HttpResponsePermanentRedirect)
+
+    def test_do_not_trigger_with_is_secure(self):
+        ''' Do not redirect when request is secure '''
+        self.request.is_secure.return_value = True
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_do_not_trigger_with_debug(self):
+        ''' Do not redirect when DEBUG is on '''
+        settings.DEBUG = True
+        self.request.META["HTTP_X_FORWARDED_PROTO"] = 'http'
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_trigger_with_header(self):
+        ''' Redirect when forwarded protocol is http '''
+        self.request.META["HTTP_X_FORWARDED_PROTO"] = 'http'
+        self.assertIsInstance(self.middleware.process_request(self.request),
+                              HttpResponsePermanentRedirect)
+
+    def test_do_not_trigger_with_https_header(self):
+        ''' Do not redirect when protocol is already https '''
+        self.request.META["HTTP_X_FORWARDED_PROTO"] = 'https'
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+
+class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable-msg=R0904
     ''' Tests for the WWW removal middleware '''
 
-    def setUp(self): # pylint: disable-msg=C0103
+    def setUp(self):  # pylint: disable-msg=C0103
         ''' All tests will need an instance of the middleware '''
         self.middleware = NoWwwMiddleware()
         settings.NO_WWW = True
@@ -73,19 +131,20 @@ class TestNoWwwMiddleware(unittest2.TestCase): # pylint: disable-msg=R0904
 
     def test_ssl(self):
         ''' Test that secure requests are redirected to non-www URLs '''
-        self.request.is_secure = MagicMock(return_value = True)
+        self.request.is_secure = MagicMock(return_value=True)
         response = self.middleware.process_request(self.request)
         self.assertTrue(response['Location'].startswith('https://example.com'))
 
     def test_query_string(self):
-        ''' If there are query parameters, they should remain after redirect '''
+        ''' If there are query parameters, they remain after redirect '''
         self.request.GET = {'key': 'value'}
         self.request.META['QUERY_STRING'] = 'key=value'
         response = self.middleware.process_request(self.request)
         self.assertTrue(response['Location'].startswith('http://example.com/'))
         self.assertIn('?key=value', response['Location'])
 
-class TestDjheroku(unittest2.TestCase): # pylint: disable-msg=R0904
+
+class TestDjheroku(unittest2.TestCase):  # pylint: disable-msg=R0904
     ''' Test configuration parameters from Heroku env to Django settings '''
 
     def test_sendgrid_basic(self):
