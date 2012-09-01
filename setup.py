@@ -1,6 +1,11 @@
 #!/usr/bin/env python
+''' Setuptools installation script for Djheroku '''
 
 from setuptools import setup
+
+requirements = ''
+with open('requirements.txt') as req:
+    requirements = req.read()
 
 setup(name='Djheroku',
       version='0.2',
@@ -9,5 +14,5 @@ setup(name='Djheroku',
       author_email='ferrix+git@ferrix.fi',
       url='http://github.com/ferrix/djheroku/',
       packages=['djheroku'],
-      setup_requires=['unittest2'],
-     )
+      install_requires=requirements,
+      )
