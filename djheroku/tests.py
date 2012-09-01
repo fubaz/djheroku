@@ -1,6 +1,8 @@
 ''' Djheroku tests '''
 from __future__ import with_statement
 
+# pylint: disable=R0904
+
 import unittest2
 from mock import MagicMock
 from djheroku import sendgrid, mailgun, cloudant
@@ -33,6 +35,7 @@ os.environ.__getitem__.side_effect = getitem
 
 
 class TestForceSSLMiddleware(unittest2.TestCase):
+    ''' Tests for SSL redirection middleware '''
     def setUp(self):  # pylint: disable=C0103
         self.middleware = ForceSSLMiddleware()
         settings.FORCE_SSL = True
@@ -142,7 +145,6 @@ class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable-msg=R0904
         response = self.middleware.process_request(self.request)
         self.assertTrue(response['Location'].startswith('http://example.com/'))
         self.assertIn('?key=value', response['Location'])
-
 
 class TestDjheroku(unittest2.TestCase):  # pylint: disable-msg=R0904
     ''' Test configuration parameters from Heroku env to Django settings '''
