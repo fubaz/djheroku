@@ -91,10 +91,10 @@ class TestForceSSLMiddleware(unittest2.TestCase):
         self.assertIsNone(self.middleware.process_request(self.request))
 
 
-class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable-msg=R0904
+class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable=R0904
     ''' Tests for the WWW removal middleware '''
 
-    def setUp(self):  # pylint: disable-msg=C0103
+    def setUp(self):  # pylint: disable=C0103
         ''' All tests will need an instance of the middleware '''
         self.middleware = NoWwwMiddleware()
         settings.NO_WWW = True
@@ -146,7 +146,7 @@ class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable-msg=R0904
         self.assertTrue(response['Location'].startswith('http://example.com/'))
         self.assertIn('?key=value', response['Location'])
 
-class TestDjheroku(unittest2.TestCase):  # pylint: disable-msg=R0904
+class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     ''' Test configuration parameters from Heroku env to Django settings '''
 
     def test_sendgrid_basic(self):
