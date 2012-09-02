@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 ''' Setuptools installation script for Djheroku '''
+from __future__ import with_statement
 
 from setuptools import setup
 
