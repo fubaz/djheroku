@@ -6,4 +6,4 @@ python:
 install: pip install -r requirements.txt
 script: 
  - ./setup.py nosetests
- - ./setup.py lint
+ - [ "$TRAVIS_PYTHON_VERSION" == "2.7" -a "$TRAVIS" == "true" ] && ./setup.py lint
