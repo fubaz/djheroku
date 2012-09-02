@@ -23,7 +23,7 @@ def sendgrid():
     mapping['EMAIL_HOST_PASSWORD'] = 'SENDGRID_PASSWORD'
     try:
         result = env_to_django(mapping)
-    except:  # pylint: disable-msg=W0702
+    except:  # pylint: disable=W0702
         return {}
     result['EMAIL_HOST'] = 'smtp.sendgrid.net'
     result['EMAIL_PORT'] = 587
@@ -42,7 +42,7 @@ def mailgun():
     mapping['MAILGUN_API_KEY'] = 'MAILGUN_API_KEY'
     try:
         result = env_to_django(mapping)
-    except:  # pylint: disable-msg=W0702
+    except:  # pylint: disable=W0702
         return {}
     result['EMAIL_PORT'] = int(result['EMAIL_PORT'])
     result['EMAIL_USE_TLS'] = result['EMAIL_PORT'] == 587
@@ -56,7 +56,7 @@ def cloudant():
     mapping['CLOUDANT_URL'] = 'CLOUDANT_URL'
     try:
         result = env_to_django(mapping)
-    except:  # pylint: disable-msg=W0702
+    except:  # pylint: disable=W0702
         return {}
 
     return result
