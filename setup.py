@@ -8,6 +8,10 @@ requirements = ''
 with open('requirements.txt') as req:
     requirements = req.read()
 
+setup_requirements = ''
+with open('requirements-test.txt') as reqset:
+    setup_requirements = reqset.read()
+
 setup(name='Djheroku',
       version='0.2',
       description='Some helper functionality for binding Heroku configuration to Django',
@@ -16,4 +20,5 @@ setup(name='Djheroku',
       url='http://github.com/ferrix/djheroku/',
       packages=['djheroku'],
       install_requires=requirements,
+      setup_requires=setup_requirements,
       )
