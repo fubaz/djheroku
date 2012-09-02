@@ -5,11 +5,11 @@ from django.http import HttpResponsePermanentRedirect
 from django.utils.http import urlquote
 
 
-class NoWwwMiddleware(object):  # pylint: disable-msg=R0903
+class NoWwwMiddleware(object):  # pylint: disable=R0903
     """
     Redirects requests coming to a www. host to the non-www counterpart
     """
-    def process_request(self, request):  # pylint: disable-msg=W0613,R0201
+    def process_request(self, request):  # pylint: disable=W0613,R0201
         ''' Strip WWW from url if present '''
         host = request.get_host()
         if getattr(settings, "NO_WWW", False) and host.startswith('www.'):
@@ -22,12 +22,12 @@ class NoWwwMiddleware(object):  # pylint: disable-msg=R0903
         return
 
 
-class PreferredDomainMiddleware(object):  # pylint: disable-msg=R0903
+class PreferredDomainMiddleware(object):  # pylint: disable=R0903
     """
     Redirects requests coming to an alternate domain to the configured
     preference.
     """
-    def process_request(self, request):  # pylint: disable-msg=R0201
+    def process_request(self, request):  # pylint: disable=R0201
         ''' Redirect all secondary hosts to primary one '''
         preferred_host = getattr(settings, "PREFERRED_HOST", None)
 
@@ -83,7 +83,7 @@ class ForceSSLMiddleware(object):
         secure_url = url.replace("http://", "https://")
         return self._response_sts(HttpResponsePermanentRedirect(secure_url))
 
-    def _response_sts(self, response):  # pylint: disable-msg=R0201
+    def _response_sts(self, response):  # pylint: disable=R0201
         ''' Push Strict-Transport-Security into headers if configured '''
         if not getattr(settings, "SSL_USE_STS_HEADER", True):
             return response
