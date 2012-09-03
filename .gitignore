@@ -2,3 +2,9 @@
 *.un~
 *.swo
 *.swp
+cover
+build
+dist
+nosetests.xml
+.coverage
+Djheroku.egg-info
