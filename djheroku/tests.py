@@ -13,7 +13,8 @@ from django.conf import settings
 settings.configure(DEBUG=True, DATABASES={'default': dict()})
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
-from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware, PreferredDomainMiddleware
+from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
+from djheroku.middleware import PreferredDomainMiddleware
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SENDGRID_PASSWORD': 's3cr37',
@@ -34,7 +35,7 @@ os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
 
 
-class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903
+class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903,C0301
     """ Test for middleware that redirects all requests to a preferred host """
     
     def setUp(self):  # pylint: disable=C0103
@@ -57,17 +58,17 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
         self.assertEquals('http://another.com/test_path',
                       self.middleware.process_request(self.request)['Location'])
 
-    def test_disabled_when_no_preferred_host(self):
+    def test_no_redirect_no_preferred_host(self):
         ''' Test with preferred host as None '''
         settings.PREFERRED_HOST = None
         self.assertIsNone(self.middleware.process_request(self.request))
 
-    def test_disabled_when_preferred_host_is_empty(self):
+    def test_preferred_host_empty_no_redirect(self):
         ''' Test with empty preferred host '''
         settings.PREFERRED_HOST = ''
         self.assertIsNone(self.middleware.process_request(self.request))
 
-    def test_disabled_when_preferred_host_not_defined(self):
+    def test_host_not_defined_no_redirect(self):
         ''' No preferred host, no redirect '''
         del(settings.PREFERRED_HOST)
         self.assertIsNone(self.middleware.process_request(self.request))
@@ -76,8 +77,9 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
         ''' Query string is not lost in redirect '''
         self.request.GET = {'key': 'value'}
         self.request.META['QUERY_STRING'] = 'key=value'
-        self.assertEquals('http://another.com/test_path?key=value',
-                          self.middleware.process_request(self.request)['Location'])
+        response = self.middleware.process_request(self.request)
+        expected = 'http://another.com/test_path?key=value'
+        self.assertEquals(expected, response['Location'])
 
 
 class TestForceSSLMiddleware(unittest2.TestCase):
