@@ -145,12 +145,13 @@ class TestForceSSLMiddleware(unittest2.TestCase):
 
     def test_sts_header_on(self):
         ''' STS headers get added to response '''
-        response=self.middleware.process_response(self.request, {})
+        response = self.middleware.process_response(self.request, {})
         self.assertIn('Strict-Transport-Security', response)
     
     def tests_sts_header_off(self):
+        ''' STS headers disabled by settings '''
         settings.SSL_USE_STS_HEADER = False
-        response=self.middleware.process_response(self.request, {})
+        response = self.middleware.process_response(self.request, {})
         self.assertNotIn('Strict-Transport-Security', response)
 
 class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable=R0904
