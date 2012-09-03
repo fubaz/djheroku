@@ -58,14 +58,22 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
                       self.middleware.process_request(self.request)['Location'])
 
     def test_disabled_when_no_preferred_host(self):
+        ''' Test with preferred host as None '''
         settings.PREFERRED_HOST = None
         self.assertIsNone(self.middleware.process_request(self.request))
 
     def test_disabled_when_preferred_host_is_empty(self):
+        ''' Test with empty preferred host '''
         settings.PREFERRED_HOST = ''
         self.assertIsNone(self.middleware.process_request(self.request))
 
+    def test_disabled_when_preferred_host_not_defined(self):
+        ''' No preferred host, no redirect '''
+        del(settings.PREFERRED_HOST)
+        self.assertIsNone(self.middleware.process_request(self.request))
+
     def test_query_string_passed_in_redirect(self):
+        ''' Query string is not lost in redirect '''
         self.request.GET = {'key': 'value'}
         self.request.META['QUERY_STRING'] = 'key=value'
         self.assertEquals('http://another.com/test_path?key=value',
