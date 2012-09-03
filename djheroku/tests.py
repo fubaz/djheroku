@@ -13,7 +13,7 @@ from django.conf import settings
 settings.configure(DEBUG=True, DATABASES={'default': dict()})
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
-from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
+from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware, PreferredDomainMiddleware
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SENDGRID_PASSWORD': 's3cr37',
@@ -32,6 +32,44 @@ def getitem(name):
 
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
+
+
+class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903
+    """ Test for middleware that redirects all requests to a preferred host """
+    
+    def setUp(self):  # pylint: disable=C0103
+        self.middleware = PreferredDomainMiddleware()
+        settings.PREFERRED_HOST = 'another.com'
+        settings.DEBUG = False
+        self.request = HttpRequest()
+        self.request.path = '/test_path'
+        self.request.META['SERVER_NAME'] = 'www.example.com'
+        self.request.META['SERVER_PORT'] = 80
+        self.request.is_secure = MagicMock(return_value=False)
+
+    def test_disabled_by_debug(self):
+        ''' No redirects happen when debug is on '''
+        settings.DEBUG = True
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_redirects_to_preferred(self):
+        ''' The default behavior is to redirect to the preferred host '''
+        self.assertEquals('http://another.com/test_path',
+                      self.middleware.process_request(self.request)['Location'])
+
+    def test_disabled_when_no_preferred_host(self):
+        settings.PREFERRED_HOST = None
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_disabled_when_preferred_host_is_empty(self):
+        settings.PREFERRED_HOST = ''
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_query_string_passed_in_redirect(self):
+        self.request.GET = {'key': 'value'}
+        self.request.META['QUERY_STRING'] = 'key=value'
+        self.assertEquals('http://another.com/test_path?key=value',
+                          self.middleware.process_request(self.request)['Location'])
 
 
 class TestForceSSLMiddleware(unittest2.TestCase):
