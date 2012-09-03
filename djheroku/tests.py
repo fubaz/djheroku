@@ -14,6 +14,7 @@ settings.configure(DEBUG=True, DATABASES={'default': dict()})
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
 from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
+from djheroku.middleware import PreferredDomainMiddleware
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SENDGRID_PASSWORD': 's3cr37',
@@ -32,6 +33,58 @@ def getitem(name):
 
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
+
+
+class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903,C0301
+    """ Test for middleware that redirects all requests to a preferred host """
+    
+    def setUp(self):  # pylint: disable=C0103
+        self.middleware = PreferredDomainMiddleware()
+        settings.PREFERRED_HOST = 'another.com'
+        settings.DEBUG = False
+        self.request = HttpRequest()
+        self.request.path = '/test_path'
+        self.request.META['SERVER_NAME'] = 'www.example.com'
+        self.request.META['SERVER_PORT'] = 80
+        self.request.is_secure = MagicMock(return_value=False)
+
+    def test_disabled_by_debug(self):
+        ''' No redirects happen when debug is on '''
+        settings.DEBUG = True
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_redirects_to_preferred(self):
+        ''' The default behavior is to redirect to the preferred host '''
+        self.assertEquals('http://another.com/test_path',
+                      self.middleware.process_request(self.request)['Location'])
+
+    def test_no_redirect_no_preferred_host(self):
+        ''' Test with preferred host as None '''
+        settings.PREFERRED_HOST = None
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_already_preferred_domain(self):
+        ''' No redirect if host is already right'''
+        settings.PREFERRED_HOST = 'www.example.com'
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_preferred_host_empty_no_redirect(self):
+        ''' Test with empty preferred host '''
+        settings.PREFERRED_HOST = ''
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_host_not_defined_no_redirect(self):
+        ''' No preferred host, no redirect '''
+        del(settings.PREFERRED_HOST)
+        self.assertIsNone(self.middleware.process_request(self.request))
+
+    def test_query_string_passed_in_redirect(self):
+        ''' Query string is not lost in redirect '''
+        self.request.GET = {'key': 'value'}
+        self.request.META['QUERY_STRING'] = 'key=value'
+        response = self.middleware.process_request(self.request)
+        expected = 'http://another.com/test_path?key=value'
+        self.assertEquals(expected, response['Location'])
 
 
 class TestForceSSLMiddleware(unittest2.TestCase):
@@ -90,6 +143,16 @@ class TestForceSSLMiddleware(unittest2.TestCase):
         self.request.META["HTTP_X_FORWARDED_PROTO"] = 'https'
         self.assertIsNone(self.middleware.process_request(self.request))
 
+    def test_sts_header_on(self):
+        ''' STS headers get added to response '''
+        response = self.middleware.process_response(self.request, {})
+        self.assertIn('Strict-Transport-Security', response)
+    
+    def tests_sts_header_off(self):
+        ''' STS headers disabled by settings '''
+        settings.SSL_USE_STS_HEADER = False
+        response = self.middleware.process_response(self.request, {})
+        self.assertNotIn('Strict-Transport-Security', response)
 
 class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable=R0904
     ''' Tests for the WWW removal middleware '''
