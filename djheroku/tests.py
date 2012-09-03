@@ -63,6 +63,11 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
         settings.PREFERRED_HOST = None
         self.assertIsNone(self.middleware.process_request(self.request))
 
+    def test_already_preferred_domain(self):
+        ''' No redirect if host is already right'''
+        settings.PREFERRED_HOST = 'www.example.com'
+        self.assertIsNone(self.middleware.process_request(self.request))
+
     def test_preferred_host_empty_no_redirect(self):
         ''' Test with empty preferred host '''
         settings.PREFERRED_HOST = ''
@@ -138,6 +143,15 @@ class TestForceSSLMiddleware(unittest2.TestCase):
         self.request.META["HTTP_X_FORWARDED_PROTO"] = 'https'
         self.assertIsNone(self.middleware.process_request(self.request))
 
+    def test_sts_header_on(self):
+        ''' STS headers get added to response '''
+        response=self.middleware.process_response(self.request, {})
+        self.assertIn('Strict-Transport-Security', response)
+    
+    def tests_sts_header_off(self):
+        settings.SSL_USE_STS_HEADER = False
+        response=self.middleware.process_response(self.request, {})
+        self.assertNotIn('Strict-Transport-Security', response)
 
 class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable=R0904
     ''' Tests for the WWW removal middleware '''
