@@ -1,3 +1,4 @@
+rm -rf dist
 export DJHEROKU_MINOR_VERSION=`date +%Y%m%d%H%M%S`
 virtualenv -q .venv
 . .venv/bin/activate
