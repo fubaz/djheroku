@@ -13,7 +13,7 @@ with open('requirements-test.txt') as reqset:
     setup_requirements = reqset.read()
 
 setup(name='Djheroku',
-      version='0.2',
+      version='0.3',
       description='Some helper functionality for binding Heroku configuration to Django',
       author='Ferrix Hovi',
       author_email='ferrix+git@ferrix.fi',
