@@ -4,7 +4,7 @@ Djheroku
 Djheroku is a helper script that reads Heroku configuration from environment
 variables and injects them to Django configuration.
 
-[![Build Status](https://secure.travis-ci.org/ferrix/djheroku.png?branch=master)](http://travis-ci.org/ferrix/djheroku)
+[![Build Status](https://secure.travis-ci.org/fubaz/djheroku.png?branch=master)](http://travis-ci.org/fubaz/djheroku)
 
 Configuration helpers
 ---------------------
