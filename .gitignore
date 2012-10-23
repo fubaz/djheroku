@@ -2,6 +2,7 @@
 *.un~
 *.swo
 *.swp
+*.egg
 cover
 build
 dist
