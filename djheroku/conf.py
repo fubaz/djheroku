@@ -16,6 +16,21 @@ def env_to_django(mappings):
     return result
 
 
+def env_to_env(mappings):
+    ''' Copy environment variables others variables '''
+    result = {}
+    for new_env, env in mappings.items():
+        try:
+            result[new_env] = os.environ[env]
+        except:
+            print 'Problem fetching environment variable %s' % env
+            raise
+
+    os.environ.update(result)
+
+    return result
+
+
 def sendgrid():
     ''' Map Sendgrid environment variables to Django '''
     mapping = {}
@@ -30,6 +45,33 @@ def sendgrid():
     result['EMAIL_USE_TLS'] = True
 
     return result
+
+
+def memcachier():
+    ''' Map Memcachier environment variables to Django '''
+    mapping = {}
+    mapping['MEMCACHE_SERVERS'] = 'MEMCACHIER_SERVERS'
+    mapping['MEMCACHE_USERNAME'] = 'MEMCACHIER_USERNAME'
+    mapping['MEMCACHE_PASSWORD'] = 'MEMCACHIER_PASSWORD'
+    try:
+        result = env_to_env(mapping)
+        caches = {
+            'default': {
+                'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+                'LOCATION': result['MEMCACHE_SERVERS'],
+                'TIMEOUT': 500,
+                'BINARY': True
+            }
+        }
+        result['CACHES'] = caches
+        return result
+    except:  # pylint: disable=W0702
+        caches = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+            }
+        }
+        return {'CACHES': caches}
 
 
 def mailgun():

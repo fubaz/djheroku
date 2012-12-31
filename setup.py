@@ -13,15 +13,14 @@ setup_requirements = ''
 with open('requirements-test.txt') as reqset:
     setup_requirements = reqset.read()
 
-version = '0.3'
-
-minor_version = os.environ.get('DJHEROKU_MINOR_VERSION', None)
-
-if minor_version:
-    version = version + '.' + minor_version
+if os.path.exists('.git'):
+    import commands
+    _, __version__ = commands.getstatusoutput('git describe --tags')
+else:
+    __version__ = 'unknown'
 
 setup(name='Djheroku',
-      version=version,
+      version=__version__,
       description='Some helper functionality for binding Heroku configuration to Django',
       author='Ferrix Hovi',
       author_email='ferrix+git@ferrix.fi',
