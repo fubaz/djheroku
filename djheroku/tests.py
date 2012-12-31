@@ -5,7 +5,7 @@ from __future__ import with_statement
 
 import unittest2
 from mock import MagicMock
-from djheroku import sendgrid, mailgun, cloudant
+from djheroku import sendgrid, mailgun, cloudant, memcachier
 import os
 
 from django.conf import settings
@@ -24,16 +24,32 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'MAILGUN_SMTP_SERVER': 'smtp.mailgun.com',
                 'MAILGUN_API_KEY': 'key',
                 'CLOUDANT_URL': 'http://www.google.com/',
+                'MEMCACHIER_PASSWORD': 'abcdefgh',
+		'MEMCACHIER_SERVERS': 'dev1.ec2.memcachier.com:11211',
+		'MEMCACHIER_USERNAME': 'carol',
                 }
+
+
+MODIFIED_ENVIRON = {}
 
 
 def getitem(name):
     ''' Mock getitem '''
     return ENVIRON_DICT[name]
 
+def setitem(name, value):
+    ''' Store mocked environment changes in an alternative dictionary '''
+    print name, value
+    MODIFIED_ENVIRON[name] = value
+
+def update(values):
+    ''' Redirect environment updates to an alternative dictionary '''
+    MODIFIED_ENVIRON.update(values)
+
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
-
+os.environ.__setitem__.side_effect = setitem
+os.environ.update.side_effect = update
 
 class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903,C0301
     """ Test for middleware that redirects all requests to a preferred host """
@@ -284,3 +300,22 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         result = cloudant()
         with self.assertRaises(KeyError):
             print result['CLOUDANT_URL']
+
+    def test_memcachier(self):
+        ''' Test Memcachier variables '''
+        result = memcachier()
+        self.assertEquals('abcdefgh', result['MEMCACHE_PASSWORD'])
+        self.assertEquals('carol', result['MEMCACHE_USERNAME'])
+        self.assertEquals('dev1.ec2.memcachier.com:11211',
+                          result['MEMCACHE_SERVERS'])
+        self.assertEquals('dev1.ec2.memcachier.com:11211',
+                          result['CACHES']['default']['LOCATION'])
+        self.assertEquals(ENVIRON_DICT['MEMCACHIER_SERVERS'],
+                          MODIFIED_ENVIRON['MEMCACHE_SERVERS'])
+        self.assertEquals('django_pylibmc.memcached.PyLibMCCache',
+                          result['CACHES']['default']['BACKEND'])
+        del(ENVIRON_DICT['MEMCACHIER_SERVERS'])
+        result = memcachier()
+        self.assertEquals('django.core.cache.backends.locmem.LocMemCache',
+                          result['CACHES']['default']['BACKEND'])
+
