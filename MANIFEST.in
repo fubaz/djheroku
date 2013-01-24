@@ -1,2 +1,2 @@
 include version.txt
-README.md
+include README.md
