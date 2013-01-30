@@ -1,2 +1,4 @@
-include version.txt
+include pkg_version.txt
 include README.md
+include requirements.txt
+include requirements-test.txt
