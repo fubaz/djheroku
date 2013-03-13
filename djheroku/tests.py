@@ -5,12 +5,13 @@ from __future__ import with_statement
 
 import unittest2
 from mock import MagicMock
-from djheroku import sendgrid, mailgun, cloudant, memcachier
+from djheroku import sendgrid, mailgun, cloudant, memcachier, identity
 import os
 
 from django.conf import settings
 
-settings.configure(DEBUG=True, DATABASES={'default': dict()})
+settings.configure(DEBUG=True, DATABASES={'default': dict()},
+                   ALLOWED_HOSTS=['*'])
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
 from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
@@ -25,8 +26,11 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'MAILGUN_API_KEY': 'key',
                 'CLOUDANT_URL': 'http://www.google.com/',
                 'MEMCACHIER_PASSWORD': 'abcdefgh',
-		'MEMCACHIER_SERVERS': 'dev1.ec2.memcachier.com:11211',
-		'MEMCACHIER_USERNAME': 'carol',
+                'MEMCACHIER_SERVERS': 'dev1.ec2.memcachier.com:11211',
+                'MEMCACHIER_USERNAME': 'carol',
+                'SERVER_EMAIL': 'application@example.com',
+                'INSTANCE': 'djheroku-test',
+                'ADMINS': 'Admin:admin@example.com,Boss:phb@example.com',
                 }
 
 
@@ -46,10 +50,17 @@ def update(values):
     ''' Redirect environment updates to an alternative dictionary '''
     MODIFIED_ENVIRON.update(values)
 
+def envget(name, default=None):
+    ''' Mock dict.get '''
+    if name in ENVIRON_DICT:
+        return ENVIRON_DICT[name]
+    return default
+
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
 os.environ.__setitem__.side_effect = setitem
 os.environ.update.side_effect = update
+os.environ.get.side_effect = envget
 
 class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903,C0301
     """ Test for middleware that redirects all requests to a preferred host """
@@ -319,3 +330,12 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertEquals('django.core.cache.backends.locmem.LocMemCache',
                           result['CACHES']['default']['BACKEND'])
 
+    def test_identity(self):
+        ''' Test Django email settings '''
+        result = identity()
+        self.assertEquals('application@example.com', result['SERVER_EMAIL'])
+        self.assertEquals('djheroku-test', result['EMAIL_SUBJECT_PREFIX'])
+        self.assertIn('ADMINS', result)
+        self.assertIn(['Admin', 'admin@example.com'], result['ADMINS'])
+        self.assertEquals(2, len(result['ADMINS']))
+        self.assertEquals(['Boss', 'phb@example.com'], result['ADMINS'][1])
