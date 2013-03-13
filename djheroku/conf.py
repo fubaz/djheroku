@@ -106,13 +106,13 @@ def cloudant():
 
 def identity():
     ''' Maps outgoing email settings and application name to environment '''
-    mapping = {
-                  'SERVER_EMAIL': 'SERVER_EMAIL',
-                  'EMAIL_SUBJECT_PREFIX': 'INSTANCE',
-              }
-    result = env_to_django(mapping)
-    if 'SERVER_EMAIL' not in result:
-        result['SERVER_EMAIL'] = 'root@localhost'
+    result = {}
+        
+    result['SERVER_EMAIL'] = os.environ.get('SERVER_EMAIL', 'root@localhost')
+
+    instance = os.environ.get('INSTANCE')
+    if instance:
+        result['EMAIL_SUBJECT_PREFIX'] = '[{0}] '.format(instance)
 
     admins = [x.split(':') for x in os.environ.get('ADMINS', '').split(',')]
 
