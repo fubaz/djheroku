@@ -120,3 +120,32 @@ def identity():
         result['ADMINS'] = admins
 
     return result
+
+def social():
+    ''' Maps API keys to Django settings '''
+    result = {}
+    facebook = {}
+    try:
+        facebook['FACEBOOK_APP_ID'] = os.environ['FACEBOOK_ID']
+        facebook['FACEBOOK_SECRET_KEY'] = os.environ['FACEBOOK_SECRET']
+        result.update(facebook)
+    except KeyError:
+        pass
+        
+    twitter = {}
+    try:
+        twitter['TWITTER_CONSUMER_KEY'] = os.environ['TWITTER_ID']
+        twitter['TWITTER_CONSUMER_SECRET_KEY'] = os.environ['TWITTER_SECRET']
+        result.update(twitter)
+    except KeyError:
+        pass
+
+    linkedin = {}
+    try:
+        linkedin['LINKEDIN_CONSUMER_KEY'] = os.environ['LINKEDIN_ID']
+        linkedin['LINKEDIN_CONSUMER_SECRET_KEY'] = os.environ['LINKEDIN_SECRET']
+        result.update(linkedin)
+    except KeyError:
+        pass
+
+    return result
