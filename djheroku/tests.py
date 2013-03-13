@@ -5,7 +5,7 @@ from __future__ import with_statement
 
 import unittest2
 from mock import MagicMock
-from djheroku import sendgrid, mailgun, cloudant, memcachier, identity
+from djheroku import sendgrid, mailgun, cloudant, memcachier, identity, social
 import os
 
 from django.conf import settings
@@ -31,6 +31,12 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SERVER_EMAIL': 'application@example.com',
                 'INSTANCE': 'djheroku-test',
                 'ADMINS': 'Admin:admin@example.com,Boss:phb@example.com',
+                'FACEBOOK_ID': 'fbapp',
+                'FACEBOOK_SECRET': 'fbsecret',
+                'TWITTER_ID': 'twitkey',
+                'TWITTER_SECRET': 'twithush',
+                'LINKEDIN_ID': 'linkdkey',
+                'LINKEDIN_SECRET': 'linkdhush',
                 }
 
 
@@ -339,3 +345,21 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertIn(['Admin', 'admin@example.com'], result['ADMINS'])
         self.assertEquals(2, len(result['ADMINS']))
         self.assertEquals(['Boss', 'phb@example.com'], result['ADMINS'][1])
+
+    def test_social(self):
+        ''' Test API key settings '''
+        result = social()
+        self.assertEquals('fbapp', result['FACEBOOK_APP_ID'])
+        self.assertEquals('fbsecret', result['FACEBOOK_SECRET_KEY'])
+        self.assertEquals('twitkey', result['TWITTER_CONSUMER_KEY'])
+        self.assertEquals('twithush', result['TWITTER_CONSUMER_SECRET_KEY'])
+        self.assertEquals('linkdkey', result['LINKEDIN_CONSUMER_KEY'])
+        self.assertEquals('linkdhush', result['LINKEDIN_CONSUMER_SECRET_KEY'])
+
+        del(ENVIRON_DICT['FACEBOOK_SECRET'])
+        del(ENVIRON_DICT['TWITTER_ID'])
+        result = social()
+        self.assertNotIn('FACEBOOK_APP_ID', result)
+        self.assertNotIn('TWITTER_CONSUMER_SECRET_KEY', result)
+        self.assertIn('LINKEDIN_CONSUMER_KEY', result)
+

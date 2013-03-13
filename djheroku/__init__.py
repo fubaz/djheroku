@@ -1,2 +1,3 @@
 ''' Djheroku for populating Heroku environment variables to Django '''
-from djheroku.conf import sendgrid, mailgun, cloudant, memcachier, identity
+from djheroku.conf import (sendgrid, mailgun, cloudant, memcachier, identity,
+                           social)
