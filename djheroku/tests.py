@@ -334,7 +334,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         ''' Test Django email settings '''
         result = identity()
         self.assertEquals('application@example.com', result['SERVER_EMAIL'])
-        self.assertEquals('djheroku-test', result['EMAIL_SUBJECT_PREFIX'])
+        self.assertEquals('[djheroku-test] ', result['EMAIL_SUBJECT_PREFIX'])
         self.assertIn('ADMINS', result)
         self.assertIn(['Admin', 'admin@example.com'], result['ADMINS'])
         self.assertEquals(2, len(result['ADMINS']))
