@@ -37,7 +37,7 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'TWITTER_SECRET': 'twithush',
                 'LINKEDIN_ID': 'linkdkey',
                 'LINKEDIN_SECRET': 'linkdhush',
-                }
+               }
 
 
 MODIFIED_ENVIRON = {}
@@ -70,7 +70,7 @@ os.environ.get.side_effect = envget
 
 class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R0903,C0301
     """ Test for middleware that redirects all requests to a preferred host """
-    
+
     def setUp(self):  # pylint: disable=C0103
         self.middleware = PreferredDomainMiddleware()
         settings.PREFERRED_HOST = 'another.com'
@@ -89,7 +89,8 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
     def test_redirects_to_preferred(self):
         ''' The default behavior is to redirect to the preferred host '''
         self.assertEquals('http://another.com/test_path',
-                      self.middleware.process_request(self.request)['Location'])
+                          self.middleware.process_request(
+                              self.request)['Location'])
 
     def test_no_redirect_no_preferred_host(self):
         ''' Test with preferred host as None '''
@@ -108,7 +109,7 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
 
     def test_host_not_defined_no_redirect(self):
         ''' No preferred host, no redirect '''
-        del(settings.PREFERRED_HOST)
+        del settings.PREFERRED_HOST
         self.assertIsNone(self.middleware.process_request(self.request))
 
     def test_query_string_passed_in_redirect(self):
@@ -140,7 +141,7 @@ class TestForceSSLMiddleware(unittest2.TestCase):
 
     def test_middleware_enabled_by_default(self):
         ''' The middleware is off by default '''
-        del(settings.FORCE_SSL)
+        del settings.FORCE_SSL
         self.assertIsInstance(self.middleware.process_request(self.request),
                               HttpResponsePermanentRedirect)
 
@@ -180,7 +181,7 @@ class TestForceSSLMiddleware(unittest2.TestCase):
         ''' STS headers get added to response '''
         response = self.middleware.process_response(self.request, {})
         self.assertIn('Strict-Transport-Security', response)
-    
+
     def tests_sts_header_off(self):
         ''' STS headers disabled by settings '''
         settings.SSL_USE_STS_HEADER = False
@@ -256,7 +257,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
 
     def test_sendgrid_missing_env(self):
         ''' Test that variables are not set if environment is not present '''
-        del(ENVIRON_DICT['SENDGRID_USERNAME'])
+        del ENVIRON_DICT['SENDGRID_USERNAME']
 
         result = sendgrid()
         self.assertIsInstance(result, dict)
@@ -272,7 +273,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
             print result['EMAIL_USE_TLS']
 
         ENVIRON_DICT['SENDGRID_USERNAME'] = 'carol'
-        del(ENVIRON_DICT['SENDGRID_PASSWORD'])
+        del ENVIRON_DICT['SENDGRID_PASSWORD']
 
         result = sendgrid()
         with self.assertRaises(KeyError):
@@ -294,7 +295,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
 
     def test_mailgun_missing_env(self):
         ''' Test that variables are not set if environment is not present '''
-        del(ENVIRON_DICT['MAILGUN_API_KEY'])
+        del ENVIRON_DICT['MAILGUN_API_KEY']
         result = mailgun()
         with self.assertRaises(KeyError):
             print result['EMAIL_HOST_USER']
@@ -313,7 +314,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         ''' Test Cloudant variables '''
         result = cloudant()
         self.assertEquals('http://www.google.com/', result['CLOUDANT_URL'])
-        del(ENVIRON_DICT['CLOUDANT_URL'])
+        del ENVIRON_DICT['CLOUDANT_URL']
         result = cloudant()
         with self.assertRaises(KeyError):
             print result['CLOUDANT_URL']
@@ -331,7 +332,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
                           MODIFIED_ENVIRON['MEMCACHE_SERVERS'])
         self.assertEquals('django_pylibmc.memcached.PyLibMCCache',
                           result['CACHES']['default']['BACKEND'])
-        del(ENVIRON_DICT['MEMCACHIER_SERVERS'])
+        del ENVIRON_DICT['MEMCACHIER_SERVERS']
         result = memcachier()
         self.assertEquals('django.core.cache.backends.locmem.LocMemCache',
                           result['CACHES']['default']['BACKEND'])
@@ -356,8 +357,8 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertEquals('linkdkey', result['LINKEDIN_CONSUMER_KEY'])
         self.assertEquals('linkdhush', result['LINKEDIN_CONSUMER_SECRET_KEY'])
 
-        del(ENVIRON_DICT['FACEBOOK_SECRET'])
-        del(ENVIRON_DICT['TWITTER_ID'])
+        del ENVIRON_DICT['FACEBOOK_SECRET']
+        del ENVIRON_DICT['TWITTER_ID']
         result = social()
         self.assertNotIn('FACEBOOK_APP_ID', result)
         self.assertNotIn('TWITTER_CONSUMER_SECRET_KEY', result)
