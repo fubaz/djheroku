@@ -57,12 +57,11 @@ class ForceSSLMiddleware(object):
     """
     def process_request(self, request):
         ''' If the connection is not secure, redirect '''
-        if not any([
-            settings.DEBUG,
-            request.is_secure(),
-            request.META.get("HTTP_X_FORWARDED_PROTO", "") == 'https',
-            not getattr(settings, "FORCE_SSL", True)
-        ]):
+        if not any([settings.DEBUG,
+                    request.is_secure(),
+                    request.META.get("HTTP_X_FORWARDED_PROTO", "") == 'https',
+                    not getattr(settings, "FORCE_SSL", True)
+                   ]):
             return self._redirect(request)
 
     def process_response(self, request, response):  # pylint: disable=W0613

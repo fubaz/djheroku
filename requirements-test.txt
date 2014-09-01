@@ -3,5 +3,5 @@ coverage>=3.5.2
 Django>=1.4.1
 nose>=1.2.1
 setuptools-lint==0.3
-pylint==0.26.0
+pylint>=0.26.0
 mock>=1.0.0

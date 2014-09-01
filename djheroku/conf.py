@@ -107,7 +107,7 @@ def cloudant():
 def identity():
     ''' Maps outgoing email settings and application name to environment '''
     result = {}
-        
+
     result['SERVER_EMAIL'] = os.environ.get('SERVER_EMAIL', 'root@localhost')
 
     instance = os.environ.get('INSTANCE')
@@ -131,7 +131,7 @@ def social():
         result.update(facebook)
     except KeyError:
         pass
-        
+
     twitter = {}
     try:
         twitter['TWITTER_CONSUMER_KEY'] = os.environ['TWITTER_ID']
