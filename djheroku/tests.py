@@ -64,9 +64,19 @@ def envget(name, default=None):
         return ENVIRON_DICT[name]
     return default
 
+def contain(key):
+    ''' Mock dict.__contains__ '''
+    return key in ENVIRON_DICT
+
+def iterx():
+    ''' Mock dick.__iter__ '''
+    return iter(ENVIRON_DICT)
+
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
 os.environ.__setitem__.side_effect = setitem
+os.environ.__contains__.side_effect = contain
+os.environ.__iter__.side_effect = iterx
 os.environ.update.side_effect = update
 os.environ.get.side_effect = envget
 
@@ -348,6 +358,12 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertIn(['Admin', 'admin@example.com'], result['ADMINS'])
         self.assertEquals(2, len(result['ADMINS']))
         self.assertEquals(['Boss', 'phb@example.com'], result['ADMINS'][1])
+
+        del ENVIRON_DICT['ADMINS']
+        del ENVIRON_DICT['SERVER_EMAIL']
+        result = identity()
+        self.assertNotIn('ADMINS', result)
+        self.assertNotIn('SERVER_EMAIL', result)
 
     def test_social(self):
         ''' Test API key settings '''
