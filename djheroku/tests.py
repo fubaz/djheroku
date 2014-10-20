@@ -5,7 +5,8 @@ from __future__ import with_statement
 
 import unittest2
 from mock import MagicMock
-from djheroku import sendgrid, mailgun, cloudant, memcachier, identity, social
+from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
+                      social, allowed_hosts)
 import os
 
 from django.conf import settings
@@ -37,6 +38,7 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'TWITTER_SECRET': 'twithush',
                 'LINKEDIN_ID': 'linkdkey',
                 'LINKEDIN_SECRET': 'linkdhush',
+                'ALLOWED_HOSTS': 'example.com:80, some.ly',
                }
 
 
@@ -363,4 +365,15 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertNotIn('FACEBOOK_APP_ID', result)
         self.assertNotIn('TWITTER_CONSUMER_SECRET_KEY', result)
         self.assertIn('LINKEDIN_CONSUMER_KEY', result)
+
+    def test_allowed_hosts(self):
+        ''' Test host whitelist '''
+        result = allowed_hosts()
+        self.assertIn('ALLOWED_HOSTS', result)
+        self.assertIn('example.com:80', result['ALLOWED_HOSTS'])
+        self.assertIn('some.ly', result['ALLOWED_HOSTS'])
+
+        del ENVIRON_DICT['ALLOWED_HOSTS']
+        result = allowed_hosts()
+        self.assertNotIn('ALLOWED_HOSTS', result)
 

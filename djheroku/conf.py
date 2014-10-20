@@ -149,3 +149,15 @@ def social():
         pass
 
     return result
+
+
+def allowed_hosts():
+    ''' Map allowed hosts from environment to Django '''
+    mapping = {}
+    try:
+        mapping['ALLOWED_HOSTS'] = [
+            x.strip() for x in os.environ['ALLOWED_HOSTS'].split(',')]
+    except KeyError:
+        pass
+
+    return mapping
