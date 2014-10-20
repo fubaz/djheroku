@@ -6,6 +6,24 @@ variables and injects them to Django configuration.
 
 [![Build Status](https://secure.travis-ci.org/fubaz/djheroku.png?branch=master)](http://travis-ci.org/fubaz/djheroku)
 
+Autopilot for Heroku settings
+-----------------------------
+
+This is an easier way to control what Django does. Just add
+a few lines to your settings.py:
+
+    from djheroku import autopilot
+    autopilot(vars())
+
+Then you can make runtime changes to your application settings:
+
+    heroku addons:add sendgrid
+    heroku config:set ADDONS=sendgrid
+    heroku addons:add memcachier
+    heroku config:set ADDONS=sendgrid,memcachier
+
+Djheroku will change the variables accordingly.
+
 Configuration helpers
 ---------------------
 

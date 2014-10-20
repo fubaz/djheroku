@@ -6,7 +6,7 @@ from __future__ import with_statement
 import unittest2
 from mock import MagicMock
 from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
-                      social, allowed_hosts)
+                      social, allowed_hosts, autopilot)
 import os
 
 from django.conf import settings
@@ -39,6 +39,7 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'LINKEDIN_ID': 'linkdkey',
                 'LINKEDIN_SECRET': 'linkdhush',
                 'ALLOWED_HOSTS': 'example.com:80, some.ly',
+                'ADDONS': 'sendgrid,memcachier,social',
                }
 
 
@@ -64,9 +65,19 @@ def envget(name, default=None):
         return ENVIRON_DICT[name]
     return default
 
+def contain(key):
+    ''' Mock dict.__contains__ '''
+    return key in ENVIRON_DICT
+
+def iterx():
+    ''' Mock dick.__iter__ '''
+    return iter(ENVIRON_DICT)
+
 os.environ = MagicMock(spec_set=dict)
 os.environ.__getitem__.side_effect = getitem
 os.environ.__setitem__.side_effect = setitem
+os.environ.__contains__.side_effect = contain
+os.environ.__iter__.side_effect = iterx
 os.environ.update.side_effect = update
 os.environ.get.side_effect = envget
 
@@ -349,6 +360,12 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertEquals(2, len(result['ADMINS']))
         self.assertEquals(['Boss', 'phb@example.com'], result['ADMINS'][1])
 
+        del ENVIRON_DICT['ADMINS']
+        del ENVIRON_DICT['SERVER_EMAIL']
+        result = identity()
+        self.assertNotIn('ADMINS', result)
+        self.assertNotIn('SERVER_EMAIL', result)
+
     def test_social(self):
         ''' Test API key settings '''
         result = social()
@@ -377,3 +394,16 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         result = allowed_hosts()
         self.assertNotIn('ALLOWED_HOSTS', result)
 
+    def test_autopilot(self):
+        ''' Test fully automatic configuration '''
+        conf = {}
+        autopilot(conf)
+
+        self.assertIn('MEMCACHE_SERVERS', conf)
+        self.assertIn('EMAIL_HOST_USER', conf)
+        self.assertIn('SERVER_EMAIL', conf)
+        self.assertNotIn('CLOUDANT_URL', conf)
+
+        del ENVIRON_DICT['ADDONS']
+        conf = {}
+        self.assertNotIn('MEMCACHE_SERVERS', conf)

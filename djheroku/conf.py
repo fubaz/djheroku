@@ -108,16 +108,17 @@ def identity():
     ''' Maps outgoing email settings and application name to environment '''
     result = {}
 
-    result['SERVER_EMAIL'] = os.environ.get('SERVER_EMAIL', 'root@localhost')
+    server_email = os.environ.get('SERVER_EMAIL')
+    if server_email:
+        result['SERVER_EMAIL'] = server_email
 
     instance = os.environ.get('INSTANCE')
     if instance:
         result['EMAIL_SUBJECT_PREFIX'] = '[{0}] '.format(instance)
 
-    admins = [x.split(':') for x in os.environ.get('ADMINS', '').split(',')]
-
-    if admins:
-        result['ADMINS'] = admins
+    if 'ADMINS' in os.environ:
+        result['ADMINS'] = [
+            x.split(':') for x in os.environ['ADMINS'].split(',')]
 
     return result
 
@@ -161,3 +162,24 @@ def allowed_hosts():
         pass
 
     return mapping
+
+
+def autopilot(conf):
+    ''' Read list of addons to configure in environment '''
+    addons = [x.strip() for x in os.environ.get('ADDONS', '').split(',')]
+
+    addon_map = {'sendgrid': sendgrid,
+                 'mailgun': mailgun,
+                 'memcachier': memcachier,
+                 'social': social,
+                 'cloudant': cloudant,
+                }
+
+    conf.update(identity())
+    conf.update(allowed_hosts())
+
+    for addon in addons:
+        if addon in addon_map:
+            conf.update(addon_map[addon]())
+
+    return conf
