@@ -162,3 +162,24 @@ def allowed_hosts():
         pass
 
     return mapping
+
+
+def autopilot(conf):
+    ''' Read list of addons to configure in environment '''
+    addons = [x.strip() for x in os.environ.get('ADDONS', '').split(',')]
+
+    addon_map = {'sendgrid': sendgrid,
+                 'mailgun': mailgun,
+                 'memcachier': memcachier,
+                 'social': social,
+                 'cloudant': cloudant,
+                }
+
+    conf.update(identity())
+    conf.update(allowed_hosts())
+
+    for addon in addons:
+        if addon in addon_map:
+            conf.update(addon_map[addon]())
+
+    return conf

@@ -6,7 +6,7 @@ from __future__ import with_statement
 import unittest2
 from mock import MagicMock
 from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
-                      social, allowed_hosts)
+                      social, allowed_hosts, autopilot)
 import os
 
 from django.conf import settings
@@ -39,6 +39,7 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'LINKEDIN_ID': 'linkdkey',
                 'LINKEDIN_SECRET': 'linkdhush',
                 'ALLOWED_HOSTS': 'example.com:80, some.ly',
+                'ADDONS': 'sendgrid,memcachier,social',
                }
 
 
@@ -393,3 +394,16 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         result = allowed_hosts()
         self.assertNotIn('ALLOWED_HOSTS', result)
 
+    def test_autopilot(self):
+        ''' Test fully automatic configuration '''
+        conf = {}
+        autopilot(conf)
+
+        self.assertIn('MEMCACHE_SERVERS', conf)
+        self.assertIn('EMAIL_HOST_USER', conf)
+        self.assertIn('SERVER_EMAIL', conf)
+        self.assertNotIn('CLOUDANT_URL', conf)
+
+        del ENVIRON_DICT['ADDONS']
+        conf = {}
+        self.assertNotIn('MEMCACHE_SERVERS', conf)
