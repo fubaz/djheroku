@@ -1,5 +1,4 @@
-include pkg_version.txt
-include README.md
+include README.rst
 include requirements.txt
 include requirements-test.txt
 include versioneer.py
