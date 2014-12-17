@@ -27,3 +27,7 @@ def autopilot(conf):
             conf.update(addon_map[addon]())
 
     return conf
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions

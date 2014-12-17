@@ -2,3 +2,5 @@ include pkg_version.txt
 include README.md
 include requirements.txt
 include requirements-test.txt
+include versioneer.py
+include djheroku/_version.py

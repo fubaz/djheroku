@@ -3,6 +3,7 @@
 *.swo
 *.swp
 *.egg
+*,cover
 cover
 build
 dist
