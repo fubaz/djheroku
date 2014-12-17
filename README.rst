@@ -4,18 +4,21 @@ Djheroku
 Djheroku is a helper script that reads Heroku configuration from environment
 variables and injects them to Django configuration.
 
-[![Build Status](https://secure.travis-ci.org/fubaz/djheroku.png?branch=master)](http://travis-ci.org/fubaz/djheroku)
+
+.. image:: https://secure.travis-ci.org/fubaz/djheroku.png?branch=master
+    :target: http://travis-ci.org/fubaz/djheroku
+    :alt: Build Status
 
 Autopilot for Heroku settings
 -----------------------------
 
 This is an easier way to control what Django does. Just add
-a few lines to your settings.py:
+a few lines to your settings.py::
 
     from djheroku import autopilot
     autopilot(vars())
 
-Then you can make runtime changes to your application settings:
+Then you can make runtime changes to your application settings::
 
     heroku addons:add sendgrid
     heroku config:set ADDONS=sendgrid
@@ -27,13 +30,13 @@ Djheroku will change the variables accordingly.
 Configuration helpers
 ---------------------
 
-Example:
+Example::
 
     # settings.py
     from djheroku import sendgrid
     vars().update(sendgrid())
 
-This is equivalent of typing in:
+This is equivalent of typing in::
 
     # settings.py
     import os
@@ -46,7 +49,7 @@ This is equivalent of typing in:
         EMAIL_USE_TLS = True
 
 If any of the variables are not present, the configuration will be left as it
-is. Currently there are two helpers: `sendgrid()` and `mailgun()`.
+is. Currently there are two helpers: ``sendgrid()`` and ``mailgun()``.
 
 Middleware
 ----------
@@ -54,12 +57,12 @@ Middleware
 There are three middleware classes in Djheroku. They are used to redirect
 permanently from one URL to another.
 
-* `NoWwwMiddleware` removed www. from URLs of incoming requests.
+* ``NoWwwMiddleware`` removed www. from URLs of incoming requests.
   The opposite is built-in functionality of Django. Enable this Middleware
   and set NO_WWW = True in settings.py to activate.
-* `PreferredDomainMiddleware` redirects all domains directed to the
+* ``PreferredDomainMiddleware`` redirects all domains directed to the
   application to a preferred one.
-* `ForceSSLMiddleware` redirects all non-SSL connections to a secure
+* ``ForceSSLMiddleware`` redirects all non-SSL connections to a secure
   connection.
 
 Each of these middlewares does one thing only and combined they will lead
