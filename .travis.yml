@@ -5,4 +5,4 @@ install: pip install -r requirements-test.txt
 script: 
  - ./setup.py nosetests
  - ./setup.py lint
- - ./setup.py bdist_egg
+ - ./setup.py bdist_wheel
