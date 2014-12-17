@@ -13,6 +13,7 @@ def autopilot(conf):
                  'mailgun': mailgun,
                  'memcachier': memcachier,
                  'cloudant': cloudant,
+                 'social': socialregistration,
                  'socialregistration': socialregistration,
                  'social_auth': social_auth,
                  'python_social_auth': python_social_auth,
