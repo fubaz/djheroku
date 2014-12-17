@@ -3,20 +3,20 @@ from __future__ import with_statement
 
 # pylint: disable=R0904
 
+import os
 import unittest2
 from mock import MagicMock
-from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
-                      social, allowed_hosts, autopilot)
-import os
-
 from django.conf import settings
 
-settings.configure(DEBUG=True, DATABASES={'default': dict()},
-                   ALLOWED_HOSTS=['*'])
+from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
+                      socialregistration, allowed_hosts, autopilot,
+                      social_auth, python_social_auth)
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
 from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
 from djheroku.middleware import PreferredDomainMiddleware
+
+from djheroku.authpatch import DjangoEnvStrategy
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SENDGRID_PASSWORD': 's3cr37',
@@ -32,14 +32,14 @@ ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
                 'SERVER_EMAIL': 'application@example.com',
                 'INSTANCE': 'djheroku-test',
                 'ADMINS': 'Admin:admin@example.com,Boss:phb@example.com',
-                'FACEBOOK_ID': 'fbapp',
+                'FACEBOOK_KEY': 'fbapp',
                 'FACEBOOK_SECRET': 'fbsecret',
-                'TWITTER_ID': 'twitkey',
+                'TWITTER_KEY': 'twitkey',
                 'TWITTER_SECRET': 'twithush',
-                'LINKEDIN_ID': 'linkdkey',
+                'LINKEDIN_KEY': 'linkdkey',
                 'LINKEDIN_SECRET': 'linkdhush',
                 'ALLOWED_HOSTS': 'example.com:80, some.ly',
-                'ADDONS': 'sendgrid,memcachier,social',
+                'ADDONS': 'sendgrid,memcachier,socialregistration,nothing',
                }
 
 
@@ -362,13 +362,15 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
 
         del ENVIRON_DICT['ADMINS']
         del ENVIRON_DICT['SERVER_EMAIL']
+        del ENVIRON_DICT['INSTANCE']
         result = identity()
         self.assertNotIn('ADMINS', result)
         self.assertNotIn('SERVER_EMAIL', result)
+        self.assertNotIn('EMAIL_SUBJECT_PREFIX', result)
 
-    def test_social(self):
+    def test_socialregistration(self):
         ''' Test API key settings '''
-        result = social()
+        result = socialregistration()
         self.assertEquals('fbapp', result['FACEBOOK_APP_ID'])
         self.assertEquals('fbsecret', result['FACEBOOK_SECRET_KEY'])
         self.assertEquals('twitkey', result['TWITTER_CONSUMER_KEY'])
@@ -377,11 +379,22 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         self.assertEquals('linkdhush', result['LINKEDIN_CONSUMER_SECRET_KEY'])
 
         del ENVIRON_DICT['FACEBOOK_SECRET']
-        del ENVIRON_DICT['TWITTER_ID']
-        result = social()
+        del ENVIRON_DICT['TWITTER_KEY']
+        result = socialregistration()
         self.assertNotIn('FACEBOOK_APP_ID', result)
         self.assertNotIn('TWITTER_CONSUMER_SECRET_KEY', result)
         self.assertIn('LINKEDIN_CONSUMER_KEY', result)
+
+    def test_social_auth(self):
+        ''' Test Sentry settings '''
+        result = social_auth()
+        self.assertEquals('fbapp', result['FACEBOOK_APP_ID'])
+        self.assertEquals('fbsecret', result['FACEBOOK_API_SECRET'])
+
+    def test_python_social_auth(self):
+        ''' Test python-social-auth configuration '''
+        result = python_social_auth()
+        self.assertIn('SOCIAL_AUTH_STRATEGY', result)
 
     def test_allowed_hosts(self):
         ''' Test host whitelist '''
@@ -407,3 +420,16 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         del ENVIRON_DICT['ADDONS']
         conf = {}
         self.assertNotIn('MEMCACHE_SERVERS', conf)
+
+class TestDjangoEnvStrategy(unittest2.TestCase): # pylint: disable=R0903
+    '''
+    Tests for python-social-auth Django patch
+    '''
+    def test_get_setting(self):
+        ''' Test the only thing in new Django strategy '''
+        ENVIRON_DICT['SOCIAL_AUTH_TWITTER_SECRET'] = 'overridden'
+        strategy = DjangoEnvStrategy(None)
+        self.assertEquals('twitkey', strategy.get_setting('SOCIAL_AUTH_TWITTER_KEY'))
+        self.assertEquals('overridden', strategy.get_setting('SOCIAL_AUTH_TWITTER_SECRET'))
+        with self.assertRaises(AttributeError):
+            strategy.get_setting('SOCIAL_AUTH_NOT_SET')

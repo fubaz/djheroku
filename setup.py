@@ -5,6 +5,8 @@ import os
 
 from setuptools import setup
 
+os.environ['DJANGO_SETTINGS_MODULE'] = 'djheroku.fixture'
+
 requirements = ''
 with open('requirements.txt') as req:
     requirements = req.read()

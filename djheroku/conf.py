@@ -122,35 +122,6 @@ def identity():
 
     return result
 
-def social():
-    ''' Maps API keys to Django settings '''
-    result = {}
-    facebook = {}
-    try:
-        facebook['FACEBOOK_APP_ID'] = os.environ['FACEBOOK_ID']
-        facebook['FACEBOOK_SECRET_KEY'] = os.environ['FACEBOOK_SECRET']
-        result.update(facebook)
-    except KeyError:
-        pass
-
-    twitter = {}
-    try:
-        twitter['TWITTER_CONSUMER_KEY'] = os.environ['TWITTER_ID']
-        twitter['TWITTER_CONSUMER_SECRET_KEY'] = os.environ['TWITTER_SECRET']
-        result.update(twitter)
-    except KeyError:
-        pass
-
-    linkedin = {}
-    try:
-        linkedin['LINKEDIN_CONSUMER_KEY'] = os.environ['LINKEDIN_ID']
-        linkedin['LINKEDIN_CONSUMER_SECRET_KEY'] = os.environ['LINKEDIN_SECRET']
-        result.update(linkedin)
-    except KeyError:
-        pass
-
-    return result
-
 
 def allowed_hosts():
     ''' Map allowed hosts from environment to Django '''
@@ -162,24 +133,3 @@ def allowed_hosts():
         pass
 
     return mapping
-
-
-def autopilot(conf):
-    ''' Read list of addons to configure in environment '''
-    addons = [x.strip() for x in os.environ.get('ADDONS', '').split(',')]
-
-    addon_map = {'sendgrid': sendgrid,
-                 'mailgun': mailgun,
-                 'memcachier': memcachier,
-                 'social': social,
-                 'cloudant': cloudant,
-                }
-
-    conf.update(identity())
-    conf.update(allowed_hosts())
-
-    for addon in addons:
-        if addon in addon_map:
-            conf.update(addon_map[addon]())
-
-    return conf
