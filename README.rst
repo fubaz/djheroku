@@ -17,6 +17,18 @@ variables and injects them to Django configuration.
      :target: https://requires.io/github/fubaz/djheroku/requirements/?branch=master
      :alt: Requirements Status
 
+.. image:: https://pypip.in/version/djheroku/badge.svg
+    :target: https://pypi.python.org/pypi/djheroku/
+    :alt: Latest Version
+
+.. image:: https://pypip.in/wheel/djheroku/badge.svg
+    :target: https://pypi.python.org/pypi/djheroku/
+    :alt: Wheel Status
+
+.. image:: https://pypip.in/license/djheroku/badge.svg
+    :target: https://pypi.python.org/pypi/djheroku/
+    :alt: License
+
 Autopilot for Heroku settings
 -----------------------------
 
