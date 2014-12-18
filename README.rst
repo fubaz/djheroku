@@ -9,6 +9,10 @@ variables and injects them to Django configuration.
     :target: http://travis-ci.org/fubaz/djheroku
     :alt: Build Status
 
+.. image:: https://coveralls.io/repos/ferrix/djheroku/badge.png
+    :target: https://coveralls.io/r/ferrix/djheroku
+    :alt: Test Coverage
+
 Autopilot for Heroku settings
 -----------------------------
 
