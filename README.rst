@@ -13,6 +13,10 @@ variables and injects them to Django configuration.
     :target: https://coveralls.io/r/ferrix/djheroku
     :alt: Test Coverage
 
+.. image:: https://requires.io/github/fubaz/djheroku/requirements.svg?branch=master
+     :target: https://requires.io/github/fubaz/djheroku/requirements/?branch=master
+     :alt: Requirements Status
+
 Autopilot for Heroku settings
 -----------------------------
 
