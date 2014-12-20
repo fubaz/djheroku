@@ -70,7 +70,7 @@ def contain(key):
     return key in ENVIRON_DICT
 
 def iterx():
-    ''' Mock dick.__iter__ '''
+    ''' Mock dict.__iter__ '''
     return iter(ENVIRON_DICT)
 
 os.environ = MagicMock(spec_set=dict)
