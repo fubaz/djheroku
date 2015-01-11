@@ -8,7 +8,7 @@ environment.
 import os
 from social.strategies.django_strategy import DjangoStrategy
 
-class DjangoEnvStrategy(DjangoStrategy): # pylint: disable=R0903
+class DjangoEnvStrategy(DjangoStrategy): # pylint: disable=R0903,R0904
     ''' Django Strategy that reads parameters from env '''
     def get_setting(self, name):
         setting = os.environ.get(name)

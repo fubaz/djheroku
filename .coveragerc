@@ -1,3 +1,4 @@
 [run]
 omit =
     djheroku/_version.py
+    djheroku/tests.py

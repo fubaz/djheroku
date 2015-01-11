@@ -396,6 +396,23 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
         result = python_social_auth()
         self.assertIn('SOCIAL_AUTH_STRATEGY', result)
 
+    def test_no_social_package(self):
+        ''' No fail when python-social-auth is not installed '''
+        def raise_import_error(*args, **kwargs): # pylint: disable=W0613
+            ''' Force an ImportError with this mock '''
+            raise ImportError('This is what happens!')
+
+        import imp
+        original = imp.find_module
+        imp.find_module = raise_import_error
+
+        result = python_social_auth()
+
+        try:
+            self.assertNotIn('SOCIAL_AUTH_STRATEGY', result)
+        finally:
+            imp.find_module = original
+
     def test_allowed_hosts(self):
         ''' Test host whitelist '''
         result = allowed_hosts()
@@ -429,7 +446,9 @@ class TestDjangoEnvStrategy(unittest2.TestCase): # pylint: disable=R0903
         ''' Test the only thing in new Django strategy '''
         ENVIRON_DICT['SOCIAL_AUTH_TWITTER_SECRET'] = 'overridden'
         strategy = DjangoEnvStrategy(None)
-        self.assertEquals('twitkey', strategy.get_setting('SOCIAL_AUTH_TWITTER_KEY'))
-        self.assertEquals('overridden', strategy.get_setting('SOCIAL_AUTH_TWITTER_SECRET'))
+        self.assertEquals('twitkey',
+                          strategy.get_setting('SOCIAL_AUTH_TWITTER_KEY'))
+        self.assertEquals('overridden',
+                          strategy.get_setting('SOCIAL_AUTH_TWITTER_SECRET'))
         with self.assertRaises(AttributeError):
             strategy.get_setting('SOCIAL_AUTH_NOT_SET')
