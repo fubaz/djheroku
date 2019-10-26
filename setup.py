@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=invalid-name
 ''' Setuptools installation script for Djheroku '''
 from __future__ import with_statement
 import os
@@ -10,7 +11,7 @@ versioneer.VCS = 'git'
 versioneer.versionfile_source = 'djheroku/_version.py'
 versioneer.versionfile_build = None
 versioneer.tag_prefix = ''
-versioneer.parentdir_prefix = 'Djheroku-' # dirname like 'myproject-1.2.0'
+versioneer.parentdir_prefix = 'Djheroku-'
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'djheroku.fixture'
 
@@ -34,7 +35,7 @@ setup(name='Djheroku',
       install_requires=requirements,
       setup_requires=['nose>=1.2.1'],
       tests_require=test_requirements,
-      classifiers = [
+      classifiers=[
           "Development Status :: 5 - Production/Stable",
           "Environment :: Web Environment",
           "Intended Audience :: Developers",
@@ -43,4 +44,4 @@ setup(name='Djheroku',
           "Programming Language :: Python",
           "Framework :: Django",
       ]
-)
+     )

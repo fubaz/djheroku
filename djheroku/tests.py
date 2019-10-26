@@ -8,14 +8,13 @@ import unittest2
 from mock import MagicMock
 from django.conf import settings
 
+from django.http import HttpResponsePermanentRedirect, HttpRequest
+
 from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
                       socialregistration, allowed_hosts, autopilot,
                       social_auth, python_social_auth)
-
-from django.http import HttpResponsePermanentRedirect, HttpRequest
 from djheroku.middleware import NoWwwMiddleware, ForceSSLMiddleware
 from djheroku.middleware import PreferredDomainMiddleware
-
 from djheroku.authpatch import DjangoEnvStrategy
 
 ENVIRON_DICT = {'SENDGRID_USERNAME': 'alice',
@@ -101,9 +100,9 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
 
     def test_redirects_to_preferred(self):
         ''' The default behavior is to redirect to the preferred host '''
-        self.assertEquals('http://another.com/test_path',
-                          self.middleware.process_request(
-                              self.request)['Location'])
+        self.assertEqual('http://another.com/test_path',
+                         self.middleware.process_request(
+                             self.request)['Location'])
 
     def test_no_redirect_no_preferred_host(self):
         ''' Test with preferred host as None '''
@@ -131,7 +130,7 @@ class TestPreferredDomainMiddleware(unittest2.TestCase):  # pylint: disable=R090
         self.request.META['QUERY_STRING'] = 'key=value'
         response = self.middleware.process_request(self.request)
         expected = 'http://another.com/test_path?key=value'
-        self.assertEquals(expected, response['Location'])
+        self.assertEqual(expected, response['Location'])
 
 
 class TestForceSSLMiddleware(unittest2.TestCase):
@@ -216,13 +215,13 @@ class TestNoWwwMiddleware(unittest2.TestCase):  # pylint: disable=R0904
     def test_middleware_disabled(self):
         ''' Test that middleware does nothing when it is off '''
         settings.NO_WWW = False
-        self.assertEquals(None, self.middleware.process_request(self.request))
+        self.assertEqual(None, self.middleware.process_request(self.request))
 
     def test_middleware_enabled(self):
         ''' Test that www gets removed from URL properly '''
         response = self.middleware.process_request(self.request)
         self.assertIsInstance(response, HttpResponsePermanentRedirect)
-        self.assertEquals(301, response.status_code)
+        self.assertEqual(301, response.status_code)
         self.assertFalse('www.example.com' in response['Location'])
 
     def test_no_www_in_input(self):
@@ -262,11 +261,11 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     def test_sendgrid_basic(self):
         ''' Test Sendgrid configuration '''
         result = sendgrid()
-        self.assertEquals('alice', result['EMAIL_HOST_USER'])
-        self.assertEquals('s3cr37', result['EMAIL_HOST_PASSWORD'])
+        self.assertEqual('alice', result['EMAIL_HOST_USER'])
+        self.assertEqual('s3cr37', result['EMAIL_HOST_PASSWORD'])
         self.assertTrue(result['EMAIL_USE_TLS'])
         self.assertTrue('sendgrid' in result['EMAIL_HOST'])
-        self.assertEquals(587, result['EMAIL_PORT'])
+        self.assertEqual(587, result['EMAIL_PORT'])
 
     def test_sendgrid_missing_env(self):
         ''' Test that variables are not set if environment is not present '''
@@ -297,10 +296,10 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     def test_mailgun_basic(self):
         ''' Test Mailgun configuration '''
         result = mailgun()
-        self.assertEquals('bob', result['EMAIL_HOST_USER'])
-        self.assertEquals('NoneShallPass', result['EMAIL_HOST_PASSWORD'])
+        self.assertEqual('bob', result['EMAIL_HOST_USER'])
+        self.assertEqual('NoneShallPass', result['EMAIL_HOST_PASSWORD'])
         self.assertTrue('mailgun' in result['EMAIL_HOST'])
-        self.assertEquals(666, result['EMAIL_PORT'])
+        self.assertEqual(666, result['EMAIL_PORT'])
         self.assertFalse(result['EMAIL_USE_TLS'])
         ENVIRON_DICT['MAILGUN_SMTP_PORT'] = 587
         result = mailgun()
@@ -326,7 +325,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     def test_cloudant(self):
         ''' Test Cloudant variables '''
         result = cloudant()
-        self.assertEquals('http://www.google.com/', result['CLOUDANT_URL'])
+        self.assertEqual('http://www.google.com/', result['CLOUDANT_URL'])
         del ENVIRON_DICT['CLOUDANT_URL']
         result = cloudant()
         with self.assertRaises(KeyError):
@@ -335,30 +334,30 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     def test_memcachier(self):
         ''' Test Memcachier variables '''
         result = memcachier()
-        self.assertEquals('abcdefgh', result['MEMCACHE_PASSWORD'])
-        self.assertEquals('carol', result['MEMCACHE_USERNAME'])
-        self.assertEquals('dev1.ec2.memcachier.com:11211',
-                          result['MEMCACHE_SERVERS'])
-        self.assertEquals('dev1.ec2.memcachier.com:11211',
-                          result['CACHES']['default']['LOCATION'])
-        self.assertEquals(ENVIRON_DICT['MEMCACHIER_SERVERS'],
-                          MODIFIED_ENVIRON['MEMCACHE_SERVERS'])
-        self.assertEquals('django_pylibmc.memcached.PyLibMCCache',
-                          result['CACHES']['default']['BACKEND'])
+        self.assertEqual('abcdefgh', result['MEMCACHE_PASSWORD'])
+        self.assertEqual('carol', result['MEMCACHE_USERNAME'])
+        self.assertEqual('dev1.ec2.memcachier.com:11211',
+                         result['MEMCACHE_SERVERS'])
+        self.assertEqual('dev1.ec2.memcachier.com:11211',
+                         result['CACHES']['default']['LOCATION'])
+        self.assertEqual(ENVIRON_DICT['MEMCACHIER_SERVERS'],
+                         MODIFIED_ENVIRON['MEMCACHE_SERVERS'])
+        self.assertEqual('django_pylibmc.memcached.PyLibMCCache',
+                         result['CACHES']['default']['BACKEND'])
         del ENVIRON_DICT['MEMCACHIER_SERVERS']
         result = memcachier()
-        self.assertEquals('django.core.cache.backends.locmem.LocMemCache',
-                          result['CACHES']['default']['BACKEND'])
+        self.assertEqual('django.core.cache.backends.locmem.LocMemCache',
+                         result['CACHES']['default']['BACKEND'])
 
     def test_identity(self):
         ''' Test Django email settings '''
         result = identity()
-        self.assertEquals('application@example.com', result['SERVER_EMAIL'])
-        self.assertEquals('[djheroku-test] ', result['EMAIL_SUBJECT_PREFIX'])
+        self.assertEqual('application@example.com', result['SERVER_EMAIL'])
+        self.assertEqual('[djheroku-test] ', result['EMAIL_SUBJECT_PREFIX'])
         self.assertIn('ADMINS', result)
         self.assertIn(['Admin', 'admin@example.com'], result['ADMINS'])
-        self.assertEquals(2, len(result['ADMINS']))
-        self.assertEquals(['Boss', 'phb@example.com'], result['ADMINS'][1])
+        self.assertEqual(2, len(result['ADMINS']))
+        self.assertEqual(['Boss', 'phb@example.com'], result['ADMINS'][1])
 
         del ENVIRON_DICT['ADMINS']
         del ENVIRON_DICT['SERVER_EMAIL']
@@ -371,12 +370,12 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     def test_socialregistration(self):
         ''' Test API key settings '''
         result = socialregistration()
-        self.assertEquals('fbapp', result['FACEBOOK_APP_ID'])
-        self.assertEquals('fbsecret', result['FACEBOOK_SECRET_KEY'])
-        self.assertEquals('twitkey', result['TWITTER_CONSUMER_KEY'])
-        self.assertEquals('twithush', result['TWITTER_CONSUMER_SECRET_KEY'])
-        self.assertEquals('linkdkey', result['LINKEDIN_CONSUMER_KEY'])
-        self.assertEquals('linkdhush', result['LINKEDIN_CONSUMER_SECRET_KEY'])
+        self.assertEqual('fbapp', result['FACEBOOK_APP_ID'])
+        self.assertEqual('fbsecret', result['FACEBOOK_SECRET_KEY'])
+        self.assertEqual('twitkey', result['TWITTER_CONSUMER_KEY'])
+        self.assertEqual('twithush', result['TWITTER_CONSUMER_SECRET_KEY'])
+        self.assertEqual('linkdkey', result['LINKEDIN_CONSUMER_KEY'])
+        self.assertEqual('linkdhush', result['LINKEDIN_CONSUMER_SECRET_KEY'])
 
         del ENVIRON_DICT['FACEBOOK_SECRET']
         del ENVIRON_DICT['TWITTER_KEY']
@@ -388,8 +387,8 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
     def test_social_auth(self):
         ''' Test Sentry settings '''
         result = social_auth()
-        self.assertEquals('fbapp', result['FACEBOOK_APP_ID'])
-        self.assertEquals('fbsecret', result['FACEBOOK_API_SECRET'])
+        self.assertEqual('fbapp', result['FACEBOOK_APP_ID'])
+        self.assertEqual('fbsecret', result['FACEBOOK_API_SECRET'])
 
     def test_python_social_auth(self):
         ''' Test python-social-auth configuration '''
@@ -446,9 +445,9 @@ class TestDjangoEnvStrategy(unittest2.TestCase): # pylint: disable=R0903
         ''' Test the only thing in new Django strategy '''
         ENVIRON_DICT['SOCIAL_AUTH_TWITTER_SECRET'] = 'overridden'
         strategy = DjangoEnvStrategy(None)
-        self.assertEquals('twitkey',
-                          strategy.get_setting('SOCIAL_AUTH_TWITTER_KEY'))
-        self.assertEquals('overridden',
-                          strategy.get_setting('SOCIAL_AUTH_TWITTER_SECRET'))
+        self.assertEqual('twitkey',
+                         strategy.get_setting('SOCIAL_AUTH_TWITTER_KEY'))
+        self.assertEqual('overridden',
+                         strategy.get_setting('SOCIAL_AUTH_TWITTER_SECRET'))
         with self.assertRaises(AttributeError):
             strategy.get_setting('SOCIAL_AUTH_NOT_SET')

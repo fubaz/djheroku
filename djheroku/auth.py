@@ -90,4 +90,3 @@ def python_social_auth():
         return {'SOCIAL_AUTH_STRATEGY': 'djheroku.authpatch.DjangoEnvStrategy'}
     except ImportError:
         return {}
-
