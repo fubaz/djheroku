@@ -24,10 +24,14 @@ if os.path.exists('requirements-test.txt'):
     with open('requirements-test.txt') as reqtest:
         test_requirements = reqtest.read()
 
+with open('README.rst') as rdm:
+    long_description = rdm.read()
+
 setup(name='Djheroku',
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
       description='Some helper functionality for binding Heroku configuration to Django',
+      long_description=long_description,
       author='Ferrix Hovi',
       author_email='ferrix+git@ferrix.fi',
       url='http://github.com/fubaz/djheroku/',
