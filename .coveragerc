@@ -2,3 +2,8 @@
 omit =
     djheroku/_version.py
     djheroku/tests.py
+
+[report]
+omit =
+    djheroku/_version.py
+    djheroku/tests.py
