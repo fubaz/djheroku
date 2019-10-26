@@ -4,9 +4,13 @@ from __future__ import with_statement
 # pylint: disable=R0904
 
 import os
+
 import unittest2
 from mock import MagicMock
 from django.conf import settings
+import django
+
+django.setup()  # pylint: disable=wrong-import-position
 
 from django.http import HttpResponsePermanentRedirect, HttpRequest
 
