@@ -1,9 +1,13 @@
 ''' Djheroku for populating Heroku environment variables to Django '''
+import os
+
 from djheroku.conf import (sendgrid, mailgun, cloudant, memcachier, identity,
                            allowed_hosts)
 from djheroku.auth import social_auth, socialregistration, python_social_auth
 
-import os
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
 
 def autopilot(conf):
     ''' Read list of addons to configure in environment '''
@@ -27,7 +31,3 @@ def autopilot(conf):
             conf.update(addon_map[addon]())
 
     return conf
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions

@@ -19,7 +19,7 @@ class NoWwwMiddleware(object):  # pylint: disable=R0903
             if request.GET:
                 newurl += '?' + request.META['QUERY_STRING']
             return HttpResponsePermanentRedirect(newurl)
-        return
+        return None
 
 
 class PreferredDomainMiddleware(object):  # pylint: disable=R0903
@@ -40,7 +40,7 @@ class PreferredDomainMiddleware(object):  # pylint: disable=R0903
                 if request.GET:
                     newurl += '?' + request.META['QUERY_STRING']
                 return HttpResponsePermanentRedirect(newurl)
-        return
+        return None
 
 
 class ForceSSLMiddleware(object):
@@ -63,6 +63,7 @@ class ForceSSLMiddleware(object):
                     not getattr(settings, "FORCE_SSL", True)
                    ]):
             return self._redirect(request)
+        return None
 
     def process_response(self, request, response):  # pylint: disable=W0613
         ''' Push Strict-Transport-Security into headers if configured '''
