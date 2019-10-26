@@ -17,15 +17,15 @@ variables and injects them to Django configuration.
      :target: https://requires.io/github/fubaz/djheroku/requirements/?branch=master
      :alt: Requirements Status
 
-.. image:: https://pypip.in/version/djheroku/badge.svg
+.. image:: https://img.shields.io/pypi/v/djheroku.svg
     :target: https://pypi.python.org/pypi/djheroku/
     :alt: Latest Version
 
-.. image:: https://pypip.in/wheel/djheroku/badge.svg
+.. image:: https://img.shields.io/pypi/wheel/djheroku.svg
     :target: https://pypi.python.org/pypi/djheroku/
     :alt: Wheel Status
 
-.. image:: https://pypip.in/license/djheroku/badge.svg
+.. image:: https://img.shields.io/pypi/l/djheroku.svg
     :target: https://pypi.python.org/pypi/djheroku/
     :alt: License
 
