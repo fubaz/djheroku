@@ -6,7 +6,15 @@ environment.
 '''
 
 import os
-from social.strategies.django_strategy import DjangoStrategy
+import django
+from django.core.exceptions import AppRegistryNotReady
+try:
+    from social.strategies.django_strategy import DjangoStrategy
+except AppRegistryNotReady:
+    # This is to make tests pass. This should not happen when Django
+    # is properly configured
+    django.setup()
+    from social.strategies.django_strategy import DjangoStrategy
 
 class DjangoEnvStrategy(DjangoStrategy): # pylint: disable=R0903,R0904
     ''' Django Strategy that reads parameters from env '''
