@@ -57,7 +57,7 @@ def memcachier():
         result = env_to_env(mapping)
         caches = {
             'default': {
-                'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+                'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
                 'LOCATION': result['MEMCACHE_SERVERS'],
                 'TIMEOUT': 500,
                 'BINARY': True
