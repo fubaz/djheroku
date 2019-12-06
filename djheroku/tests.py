@@ -12,7 +12,7 @@ import django
 
 django.setup()  # pylint: disable=wrong-import-position
 
-from django.http import HttpResponsePermanentRedirect, HttpRequest
+from django.http import HttpResponsePermanentRedirect, HttpRequest, Http404
 
 from djheroku import (sendgrid, mailgun, cloudant, memcachier, identity,
                       socialregistration, allowed_hosts, autopilot,
@@ -152,7 +152,7 @@ class TestForceSSLMiddleware(unittest2.TestCase):
     def test_post_fails(self):
         ''' POST data is lost in redirection -> fail '''
         self.request.method = 'POST'
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(Http404):
             self.middleware.process_request(self.request)
 
     def test_middleware_enabled_by_default(self):
@@ -346,7 +346,7 @@ class TestDjheroku(unittest2.TestCase):  # pylint: disable=R0904
                          result['CACHES']['default']['LOCATION'])
         self.assertEqual(ENVIRON_DICT['MEMCACHIER_SERVERS'],
                          MODIFIED_ENVIRON['MEMCACHE_SERVERS'])
-        self.assertEqual('django_pylibmc.memcached.PyLibMCCache',
+        self.assertEqual('django.core.cache.backends.memcached.MemcachedCache',
                          result['CACHES']['default']['BACKEND'])
         del ENVIRON_DICT['MEMCACHIER_SERVERS']
         result = memcachier()
