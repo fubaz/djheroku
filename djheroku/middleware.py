@@ -1,7 +1,7 @@
 """ Djheroku middleware classes """
 
 from django.conf import settings
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponsePermanentRedirect, Http404
 from django.utils.http import urlquote
 
 
@@ -72,7 +72,7 @@ class ForceSSLMiddleware(object):
     def _redirect(self, request):
         ''' Redirect requests to SSL url '''
         if request.method == 'POST':
-            raise RuntimeError(
+            raise Http404(
                 """
                 Django can't perform a SSL redirect while maintaining POST
                 data. Please structure your views so that redirects only occur
